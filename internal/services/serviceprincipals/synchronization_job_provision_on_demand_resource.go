@@ -3,10 +3,11 @@ package serviceprincipals
 import (
 	"context"
 	"errors"
-	"github.com/hashicorp/go-azure-sdk/sdk/odata"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"net/http"
 	"time"
+
+	"github.com/hashicorp/go-azure-sdk/sdk/odata"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/hashicorp/go-uuid"
 

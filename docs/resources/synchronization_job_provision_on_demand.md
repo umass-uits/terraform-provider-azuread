@@ -100,6 +100,10 @@ The following arguments are supported:
 * `object_id` (String) The identifier of an object to which a synchronizationJob is to be applied.
 * `object_type_name` (String) The type of the object to which a synchronizationJob is to be applied.
 
+## Attributes Reference
+
+No additional attributes are exported.
+
 ## Import
 
 This resource does not support importing.
