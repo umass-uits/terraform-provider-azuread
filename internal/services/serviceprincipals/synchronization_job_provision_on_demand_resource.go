@@ -91,7 +91,7 @@ func synchronizationProvisionOnDemandResourceCreate(ctx context.Context, d *sche
 	client := meta.(*clients.Client).ServicePrincipals.SynchronizationJobClient
 	spClient := meta.(*clients.Client).ServicePrincipals.ServicePrincipalsClient
 	objectId := d.Get("service_principal_id").(string)
-	jobId := d.Get("job_id").(string)
+	jobId := d.Get("synchronization_job_id").(string)
 
 	tf.LockByName(servicePrincipalResourceName, objectId)
 	defer tf.UnlockByName(servicePrincipalResourceName, objectId)
@@ -119,7 +119,7 @@ func synchronizationProvisionOnDemandResourceCreate(ctx context.Context, d *sche
 	}
 	// Create a new synchronization job
 	synchronizationProvisionOnDemand := &msgraph.SynchronizationJobProvisionOnDemand{
-		Parameters: expandSynchronizationJobApplicationParameters(d.Get("parameters").([]interface{})),
+		Parameters: expandSynchronizationJobApplicationParameters(d.Get("parameter").([]interface{})),
 	}
 
 	_, err = client.ProvisionOnDemand(ctx, jobId, synchronizationProvisionOnDemand, *servicePrincipal.ID())

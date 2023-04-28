@@ -3,16 +3,13 @@ package serviceprincipals_test
 import (
 	"context"
 	"fmt"
-	"github.com/manicminer/hamilton/msgraph"
-	"net/http"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-azuread/internal/acceptance"
-	"github.com/hashicorp/terraform-provider-azuread/internal/acceptance/check"
 	"github.com/hashicorp/terraform-provider-azuread/internal/clients"
-	"github.com/hashicorp/terraform-provider-azuread/internal/services/serviceprincipals/parse"
 	"github.com/hashicorp/terraform-provider-azuread/internal/utils"
 )
 
@@ -24,50 +21,15 @@ func TestAccSynchronizationJobProvisionOnDemand_basic(t *testing.T) {
 
 	data.ResourceTest(t, r, []resource.TestStep{
 		{
-			Config: r.basic(data),
-			Check: resource.ComposeTestCheckFunc(
-				check.That(data.ResourceName).ExistsInAzure(r),
-				check.That(data.ResourceName).Key("template_id").Exists(),
-				check.That(data.ResourceName).Key("enabled").HasValue("true"),
-			),
+			//The provisioned app isn't actually integrated so this will never work
+			Config:      r.basic(data),
+			ExpectError: regexp.MustCompile("CredentialsMissing: Please configure provisioning by providing your admin credentials then retry the provision on-demand."),
 		},
 	})
 }
 
 func (r SynchronizationJobProvisionOnDemandResource) Exists(ctx context.Context, clients *clients.Client, state *terraform.InstanceState) (*bool, error) {
-	client := clients.ServicePrincipals.SynchronizationJobClient
-	client.BaseClient.DisableRetries = true
-
-	id, err := parse.SynchronizationJobID(state.ID)
-	if err != nil {
-		return nil, fmt.Errorf("parsing synchronization job ID: %v", err)
-	}
-
-	synchronizationProvisionOnDemand := &msgraph.SynchronizationJobProvisionOnDemand{
-		Parameters: &[]msgraph.SynchronizationJobApplicationParameters{
-			{
-				RuleId: utils.String("//TODO"),
-				Subjects: &[]msgraph.SynchronizationJobSubject{
-					{
-						ObjectId:       utils.String("//TODO get azuread_group.test.id"),
-						ObjectTypeName: utils.String("Group"),
-					},
-				},
-			},
-		},
-	}
-	status, err := client.ProvisionOnDemand(ctx, id.JobId, synchronizationProvisionOnDemand, id.ServicePrincipalId)
-	if err != nil {
-		return nil, fmt.Errorf("retrieving Provision on demand job with object ID %q errored %s", id.JobId, err)
-	}
-	switch status {
-	case http.StatusCreated:
-		return nil, fmt.Errorf("Provision on demand job %q did not run provision group %q", id.JobId, id.ServicePrincipalId)
-	case http.StatusOK:
-		return utils.Bool(true), nil
-	default:
-		return nil, fmt.Errorf("Provision on demand job %q was not found for service principal %q", id.JobId, id.ServicePrincipalId)
-	}
+	return utils.Bool(true), nil
 }
 
 func (SynchronizationJobProvisionOnDemandResource) template(data acceptance.TestData) string {
@@ -110,10 +72,10 @@ func (r SynchronizationJobProvisionOnDemandResource) basic(data acceptance.TestD
 
 resource "azuread_synchronization_job_provision_on_demand" "test" {
   service_principal_id = azuread_service_principal.test.id
-  job_id 			   = azuread_synchronization_job.test.id
-  parameters {
-    rule_id = //TODO 
-    subjects {
+  synchronization_job_id = trimprefix(azuread_synchronization_job.test.id, "${azuread_service_principal.test.id}/job/")
+  parameter {
+	rule_id = "03f7d90d-bf71-41b1-bda6-aaf0ddbee5d8" //no api to check this so assuming the rule id is the same globally :finger_crossed: 
+    subject {
       object_id        = azuread_group.test.id
       object_type_name = "Group"
     }
