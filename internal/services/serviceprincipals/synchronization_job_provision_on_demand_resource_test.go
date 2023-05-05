@@ -35,6 +35,21 @@ func (r SynchronizationJobProvisionOnDemandResource) Exists(ctx context.Context,
 func (SynchronizationJobProvisionOnDemandResource) template(data acceptance.TestData) string {
 	return fmt.Sprintf(`
 provider "azuread" {}
+provider "azurerm" {
+  features {}
+}
+
+resource "azurerm_resource_group" "test" {
+  name     = "acctestRG-databricks-%d"
+  location = "%s"
+}
+
+resource "azurerm_databricks_workspace" "test" {
+  name                = "acctestDBW-%d"
+  resource_group_name = azurerm_resource_group.test.name
+  location            = azurerm_resource_group.test.location
+  sku                 = "%s"
+}
 
 data "azuread_client_config" "test" {}
 
