@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package users
 
 import (
@@ -157,6 +160,7 @@ func usersData() *schema.Resource {
 func usersDataSourceRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*clients.Client).Users.UsersClient
 	client.BaseClient.DisableRetries = true
+	defer func() { client.BaseClient.DisableRetries = false }()
 
 	var users []msgraph.User
 	var expectedCount int

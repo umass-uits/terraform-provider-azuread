@@ -1,3 +1,73 @@
+## 2.40.0 (Unreleased)
+
+IMPROVEMENTS:
+
+* `azuread_conditional_access_policy` - support for the `client_applications` block in the `conditions` block [GH-1047]
+* `azuread_conditional_access_policy` - support for the `disable_resilience_defaults` property in the `session_controls` block [GH-1135]
+
+## 2.39.0 (May 12, 2023)
+
+IMPROVEMENTS:
+
+* dependencies: updating to `v0.20230511.1094507` of `github.com/hashicorp/go-azure-sdk` ([#1100](https://github.com/hashicorp/terraform-provider-azuread/issues/1100))
+
+BUG FIXES:
+
+* **provider:** fix a token refresh bug that could cause authentication errors after initial token expiry ([#1100](https://github.com/hashicorp/terraform-provider-azuread/issues/1100))
+
+## 2.38.0 (April 27, 2023)
+
+FEATURES:
+
+* **New Data Source:** `azuread_access_package_catalog_role` ([#1033](https://github.com/hashicorp/terraform-provider-azuread/issues/1033))
+* **New Resource:** `azuread_access_package_catalog_role_assignment` ([#1033](https://github.com/hashicorp/terraform-provider-azuread/issues/1033))
+
+BUG FIXES:
+
+* **Provider:** fix an issue where API requests might not be retried correctly ([#1090](https://github.com/hashicorp/terraform-provider-azuread/issues/1090))
+* `azuread_service_principal_token_signing_certificate` - fix a crash when importing legacy certificates ([#1082](https://github.com/hashicorp/terraform-provider-azuread/issues/1082))
+
+## 2.37.2 (April 20, 2023)
+
+BUG FIXES:
+
+* `azuread_group` - remove conditional ForceNew for the `onpremises_group_type` property, resolve breaking change in v2.37.1 ([#1076](https://github.com/hashicorp/terraform-provider-azuread/issues/1076))
+* `azuread_group` - improve a workaround for reading Microsoft 365-only properties for groups in a non-M365 tenant ([#1076](https://github.com/hashicorp/terraform-provider-azuread/issues/1076))
+* `azuread_group` - improve a workaround for detecting unwanted changes to the `description` property ([#1074](https://github.com/hashicorp/terraform-provider-azuread/issues/1074))
+
+## 2.37.1 (April 17, 2023)
+
+NOTES:
+
+* This release contains a breaking change with the `azuread_group` resource, in order to fix a regression. Please see [#1072](https://github.com/hashicorp/terraform-provider-azuread/issues/1072) for workaround information.
+
+BUG FIXES:
+
+* `azuread_group` - fix a regression that caused `onpremises_group_type` to be set when not configured, and unsetting this property now forces replacement of the resource ([#1070](https://github.com/hashicorp/terraform-provider-azuread/issues/1070))
+
+## 2.37.0 (April 13, 2023)
+
+FEATURES:
+
+* **New Data Source:** `azuread_access_package` ([#903](https://github.com/hashicorp/terraform-provider-azuread/issues/903))
+* **New Data Source:** `azuread_access_package_catalog` ([#903](https://github.com/hashicorp/terraform-provider-azuread/issues/903))
+* **New Resource:** `azuread_access_package` ([#903](https://github.com/hashicorp/terraform-provider-azuread/issues/903))
+* **New Resource:** `azuread_access_package_assignment_policy` ([#903](https://github.com/hashicorp/terraform-provider-azuread/issues/903))
+* **New Resource:** `azuread_access_package_catalog` ([#903](https://github.com/hashicorp/terraform-provider-azuread/issues/903))
+* **New Resource:** `azuread_access_package_resource_catalog_association` ([#903](https://github.com/hashicorp/terraform-provider-azuread/issues/903))
+* **New Resource:** `azuread_access_package_resource_package_association` ([#903](https://github.com/hashicorp/terraform-provider-azuread/issues/903))
+* **New Resource:** `azuread_administrative_unit_role_member` ([#983](https://github.com/hashicorp/terraform-provider-azuread/issues/983))
+* **New Resource:** `azuread_user_flow_attribute` ([#1063](https://github.com/hashicorp/terraform-provider-azuread/issues/1063))
+
+IMPROVEMENTS:
+
+* dependencies: updating to `v0.60.0` of `github.com/manicminer/hamilton` ([#1062](https://github.com/hashicorp/terraform-provider-azuread/issues/1062))
+* `data.azuread_application` - support for the `service_management_reference` attribute ([#1046](https://github.com/hashicorp/terraform-provider-azuread/issues/1046))
+* `data.azuread_group` - support for the `onpremises_group_type` and `writeback_enabled` attributes ([#964](https://github.com/hashicorp/terraform-provider-azuread/issues/964))
+* `data.azuread_user` - support for the `mail` property ([#996](https://github.com/hashicorp/terraform-provider-azuread/issues/996))
+* `azuread_application` - support for the `service_management_reference` property ([#1046](https://github.com/hashicorp/terraform-provider-azuread/issues/1046))
+* `azuread_group` - support for the `onpremises_group_type` and `writeback_enabled` properties ([#964](https://github.com/hashicorp/terraform-provider-azuread/issues/964))
+
 ## 2.36.0 (March 03, 2023)
 
 IMPROVEMENTS:

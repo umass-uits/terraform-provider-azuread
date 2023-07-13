@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package conditionalaccess
 
 import (
@@ -106,6 +109,33 @@ func conditionalAccessPolicyResource() *schema.Resource {
 							},
 						},
 
+						"client_applications": {
+							Type:     schema.TypeList,
+							Optional: true,
+							MaxItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"included_service_principals": {
+										Type:     schema.TypeList,
+										Optional: true,
+										Elem: &schema.Schema{
+											Type:             schema.TypeString,
+											ValidateDiagFunc: validate.NoEmptyStrings,
+										},
+									},
+
+									"excluded_service_principals": {
+										Type:     schema.TypeList,
+										Optional: true,
+										Elem: &schema.Schema{
+											Type:             schema.TypeString,
+											ValidateDiagFunc: validate.NoEmptyStrings,
+										},
+									},
+								},
+							},
+						},
+
 						"users": {
 							Type:     schema.TypeList,
 							Required: true,
@@ -113,9 +143,10 @@ func conditionalAccessPolicyResource() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"included_users": {
-										Type:         schema.TypeList,
-										Optional:     true,
-										AtLeastOneOf: []string{"conditions.0.users.0.included_groups", "conditions.0.users.0.included_roles", "conditions.0.users.0.included_users"},
+										Type:             schema.TypeList,
+										Optional:         true,
+										AtLeastOneOf:     []string{"conditions.0.users.0.included_groups", "conditions.0.users.0.included_roles", "conditions.0.users.0.included_users"},
+										DiffSuppressFunc: conditionalAccessPolicyDiffSuppress,
 										Elem: &schema.Schema{
 											Type:             schema.TypeString,
 											ValidateDiagFunc: validate.NoEmptyStrings,
@@ -402,6 +433,11 @@ func conditionalAccessPolicyResource() *schema.Resource {
 							}, false),
 						},
 
+						"disable_resilience_defaults": {
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+
 						"persistent_browser_mode": {
 							Type:     schema.TypeString,
 							Optional: true,
@@ -465,6 +501,9 @@ func conditionalAccessPolicyDiffSuppress(k, old, new string, d *schema.ResourceD
 			if v, ok := sessionControls["cloud_app_security_policy"]; ok && v.(string) != "" {
 				suppress = false
 			}
+			if v, ok := sessionControls["disable_resilience_defaults"]; ok && v.(bool) {
+				suppress = false
+			}
 			if v, ok := sessionControls["persistent_browser_mode"]; ok && v.(string) != "" {
 				suppress = false
 			}
@@ -525,7 +564,7 @@ func conditionalAccessPolicyResourceUpdate(ctx context.Context, d *schema.Resour
 	// in a timeout loop, instead we're hoping that this allows enough time/activity for the update to be reflected.
 	log.Printf("[DEBUG] Waiting for conditional access policy %q to be updated", d.Id())
 	timeout, _ := ctx.Deadline()
-	stateConf := &resource.StateChangeConf{
+	stateConf := &resource.StateChangeConf{ //nolint:staticcheck
 		Pending:                   []string{"Pending"},
 		Target:                    []string{"Done"},
 		Timeout:                   time.Until(timeout),
@@ -601,6 +640,7 @@ func conditionalAccessPolicyResourceDelete(ctx context.Context, d *schema.Resour
 	}
 
 	if err := helpers.WaitForDeletion(ctx, func(ctx context.Context) (*bool, error) {
+		defer func() { client.BaseClient.DisableRetries = false }()
 		client.BaseClient.DisableRetries = true
 		if _, status, err := client.Get(ctx, policyId, odata.Query{}); err != nil {
 			if status == http.StatusNotFound {

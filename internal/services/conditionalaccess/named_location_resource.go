@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package conditionalaccess
 
 import (
@@ -156,7 +159,7 @@ func namedLocationResourceUpdate(ctx context.Context, d *schema.ResourceData, me
 		base.DisplayName = &displayName
 	}
 
-	var updateRefreshFunc resource.StateRefreshFunc
+	var updateRefreshFunc resource.StateRefreshFunc //nolint:staticcheck
 
 	if v, ok := d.GetOk("ip"); ok {
 		properties := expandIPNamedLocation(v.([]interface{}))
@@ -218,7 +221,7 @@ func namedLocationResourceUpdate(ctx context.Context, d *schema.ResourceData, me
 
 	log.Printf("[DEBUG] Waiting for named location %q to be updated", d.Id())
 	timeout, _ := ctx.Deadline()
-	stateConf := &resource.StateChangeConf{
+	stateConf := &resource.StateChangeConf{ //nolint:staticcheck
 		Pending:                   []string{"Pending"},
 		Target:                    []string{"Updated"},
 		Timeout:                   time.Until(timeout),
@@ -303,6 +306,7 @@ func namedLocationResourceDelete(ctx context.Context, d *schema.ResourceData, me
 	}
 
 	if err := helpers.WaitForDeletion(ctx, func(ctx context.Context) (*bool, error) {
+		defer func() { client.BaseClient.DisableRetries = false }()
 		client.BaseClient.DisableRetries = true
 		if _, status, err := client.Get(ctx, namedLocationId, odata.Query{}); err != nil {
 			if status == http.StatusNotFound {
