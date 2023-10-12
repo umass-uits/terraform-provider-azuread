@@ -40,6 +40,7 @@ func (r Registration) SupportedResources() map[string]*schema.Resource {
 		"azuread_service_principal_password":                         servicePrincipalPasswordResource(),
 		"azuread_service_principal_token_signing_certificate":        servicePrincipalTokenSigningCertificateResource(),
 		"azuread_synchronization_job":                                synchronizationJobResource(),
+		"azuread_synchronization_job_provision_on_demand":            synchronizationJobProvisionOnDemandResource(),
 		"azuread_synchronization_secret":                             synchronizationSecretResource(),
 	}
 }
